@@ -4,6 +4,6 @@ const camps = new Schema({
 
     title:String,
     value:Number,
-    type: String
+    location: String
 });
 module.exports = mongoose.model('Campground', camps)
