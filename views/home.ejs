@@ -1,29 +1,75 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>title</title>
-  </head>
-  <body>
-    
-    <h1> WELCOME TO THE CAMPS
+<%- layout("./Layouts/boilerplates") %>
 
-      <li> <%= campgrounds.title %></li>
-      <li> <%= campgrounds.location %>  </li>
-    </h1>
-  
-   <footer>
+<style>
+  .card {
+      margin-bottom: 10px; /* Adjust space between cards */
+  }
 
-   <a href="/campgrounds/<%= campgrounds._id %>/edit">
-   Edit the campgrounds
-   </a>
-   <form action="/campgrounds/<%= campgrounds._id %>?_method=DELETE" method="POST">
-    <button> Delete</button>
-  </form>
-   <a href="/campgrounds">
-    All campgrounds
-   </a>
-    
-   </footer>
-  </body>
-</html>
+  .mb-2 {
+      margin-bottom: 0.5rem; /* Reduce margin for the bottom spacing */
+  }
+
+  .form-label {
+      margin-bottom: 0.5rem; /* Reduce spacing below labels */
+  }
+
+  .row {
+      margin: 0; /* Remove extra margin around the row */
+  }
+
+  .col-6 {
+      padding: 10px; /* Adjust padding if necessary */
+  }
+
+  .card-body {
+      padding: 10px; /* Adjust padding inside cards */
+  }
+</style>
+
+<div class="row mb-2">
+  <div class="col-6">
+    <div class="card mb-2">
+      <img src="<%= campgrounds.image %>" class="card-img-top" alt="..." />
+      <div class="card-body">
+        <h5 class="card-title"><%= campgrounds.title %></h5>
+        <p class="card-text"><%= campgrounds.description %></p>
+      </div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item text-muted"><%= campgrounds.location %></li>
+        <li class="list-group-item">$<%= campgrounds.price %>/night</li>
+      </ul>
+      <div class="card-body">
+        <a class="card-link btn btn-info" href="/campgrounds/<%= campgrounds._id %>/edit">
+          Edit the campground
+        </a>
+        <form class="d-inline" action="/campgrounds/<%= campgrounds._id %>?_method=DELETE" method="POST">
+          <button class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-6">
+    <form class="mb-3 validateforms" action="/campgrounds/<%= campgrounds._id %>/reviews" method="POST" novalidate>
+      <h2>Leave a Review :)</h2>
+      <div class="mb-3">
+        <label for="rating" class="form-label">Rating</label>
+        <input type="range" min="1" max="5" id="rating" name="review[rating]" class="form-range" />
+      </div>
+      <div class="mb-3">
+        <label for="body" class="form-label">Review</label>
+        <textarea class="form-control" name="review[body]" id="body" cols="30" rows="3" required></textarea>
+        <div class="valid-feedback">Looks Good!</div>
+      </div>
+      <button class="btn btn-success ">Submit</button>
+    </form>
+
+    <% for (let review of campgrounds.review) { %>
+      <div class="card mb-2">
+        <div class="card-body">
+          <h5 class="card-title">Rating: <%= review.rating %></h5>
+          <p class="card-text">Review: <%= review.body %></p>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</div>

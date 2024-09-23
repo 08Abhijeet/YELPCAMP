@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "ejs-mate": "^4.0.0",
+    "joi": "^17.13.3",
     "method-override": "^3.0.0",
     "nodemon": "^3.1.5",
     "react": "^18.3.1"
