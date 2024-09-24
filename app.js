@@ -76,7 +76,7 @@ app.post("/campgrounds", validateReview, catchAsync(async(req,res,next)=>{
 app.get('/campgrounds/:id', catchAsync(async(req,res)=>{
 
     const campgrounds = await campground.findById(req.params.id).populate('review')
-    console.log(campgrounds)
+
     res.render("home" ,{campgrounds})
 }))
 app.get('/campgrounds/:id/edit', catchAsync(async(req,res)=>{
@@ -103,6 +103,14 @@ app.post("/campgrounds/:id/reviews", catchAsync(async(req,res)=>{
    await review.save()
    await campgrounds.save()
    res.redirect(`/campgrounds/${campgrounds._id}`)
+}))
+
+app.delete("/campgrounds/:id/reviews/:reviewId", catchAsync(async(req,res)=>{
+     const {id, reviewId} = req.params;
+   const ID =  await   campground.findByIdAndUpdate(id, {$pull: {review: reviewId}})
+    await Reviews.findByIdAndDelete(reviewId)
+     res.redirect(`/campgrounds/${id}`)
+
 }))
 app.all('*',(req,res,next)=>{
          next(new ExpressError('Page not FOUND', 404))
