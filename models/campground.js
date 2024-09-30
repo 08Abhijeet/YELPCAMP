@@ -26,7 +26,7 @@ camps.post('findOneAndDelete', async function(doc) {
         })
         
     }
-    console.log("DELETED");
+   
 
 });
 
