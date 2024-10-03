@@ -10,6 +10,10 @@ const camps = new Schema({
     image: String,
     location: String,
     description:String,
+    author:{
+        type:Schema.Types.ObjectId,
+        ref:"User"
+    },
     review: [{
         type: Schema.Types.ObjectId,
         ref:"Review"
