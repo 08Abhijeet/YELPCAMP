@@ -5,7 +5,7 @@
         Edit campground
       </h1>
       <div class="col-6 offset-3">
-        <form action="/campgrounds/<%=campgrounds._id %>?_method=PUT"  method="post" novalidate class="validateforms">
+        <form action="/campgrounds/<%=campgrounds._id %>?_method=PUT"  method="post" novalidate class="validateforms" enctype="multipart/form-data">
           <div class="mb-3">
             <label class="form-label" form="title"> Title:  </label>
             <input class="form-control" type="text" id="title" name="campgrounds[title]" value="<%= campgrounds.title %>" required/>
@@ -20,13 +20,7 @@
               Looks good!
             </div>
           </div>
-          <div class="mb-3">
-            <label class="form-label" for="image">Image Url</label>
-            <input class="form-control" type="text" id="location" name="campgrounds[image]" value="<%= campgrounds.image%>" required/>
-            <div class="valid-feedback">
-              Looks good!
-            </div>
-          </div>
+        
           <div class="mb-3">
             <label class="form-label" for="image">Campground Price</label>
             <div class="input-group ">
@@ -45,6 +39,29 @@
               Looks good!
             </div>
           </div>
+          <div class="mb-3">
+            <div class="input-group mb-3 custom-file">
+              <input type="file" class="form-control" id="inputGroupFile02" name="image" multiple>
+              <label class="input-group-text custom-file-label" for="image">Upload image</label>
+            </div>
+          </div>
+          <div class="mb-3">
+            <div class="row">
+              <% campgrounds.image.forEach(function(img, i) { %>
+                <div class="col-6 col-md-4 mb-2"> <!-- Adjust column size as needed -->
+                  <div class="d-flex align-items-start mb-2"> <!-- Align items at the start -->
+                    <img src="<%= img.url %>" class="img-thumbnail" style="width: 100px; height: auto; margin-right: 10px;">
+                    <div class="form-check" style="margin-left: 10px;"> <!-- Add margin for spacing -->
+                      <input type="checkbox" id="image-<%= i %>" name="deleteImages[]" value="<%= img.filename %>" class="form-check-input">
+                      <label for="image-<%= i %>" class="form-check-label" style="margin-left: 5px;">Delete?</label>
+                    </div>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+          </div>
+          
+          
     <div class="mb-3">
       <button class="btn btn-success"> Update the campground</button>
     </div>
