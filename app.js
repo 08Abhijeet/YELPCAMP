@@ -25,8 +25,14 @@ const User = require("./models/user.js");
 const userRoute = require("./routes/users.js");
 
 const MongoStore = require('connect-mongo');
-const dbUrl = process.env.DB_URL;
-mongoose.connect(dbUrl)
+const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/yelp-camp';
+mongoose.connect(dbUrl, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+}).catch(error => {
+  console.error("Error connecting to the database:", error);
+});
+
 
 const db = mongoose.connection;
 db.once("open", () => {
@@ -96,7 +102,7 @@ const store = MongoStore.create({
   mongoUrl: dbUrl,
   touchAfter: 24 * 60 * 60,
   crypto: {
-      secret: 'yourSecretKey'
+      secret:  process.env.SECRET || 'yourSecretKey'
   }
 });
 
@@ -112,6 +118,7 @@ app.use(
     saveUninitialized: true,
     cookie: {
       httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
       expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
       maxAge: 1000 * 60 * 60 * 24 * 7,
     }, // Set to true if using HTTPS
