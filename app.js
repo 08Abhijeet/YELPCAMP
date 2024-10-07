@@ -1,22 +1,19 @@
-if(process.env.NODE_ENV!== 'production')
-{
-  require("dotenv").config()
-}
+
+  require("dotenv").config();
 
 
 const express = require("express");
 const path = require("path");
 const app = express();
 const ejsMate = require("ejs-mate");
-const methodoverride = require("method-override");
-const catchAsync = require("./utils/catchAsync");
+
 const mongoose = require("mongoose");
-const campground = require("./models/campground");
+
+const helmet = require("helmet");
 const flash = require("connect-flash");
-const Reviews = require("./models/review");
-const { reviewSchema } = require("./schemas.js");
+
 const methodOverride = require("method-override");
-const Joi = require("joi");
+
 const ExpressError = require("./utils/ExpressError");
 const session = require("express-session");
 const campgrounds = require("./routes/campgrounds.js");
@@ -25,8 +22,12 @@ const passport = require("passport");
 const localPassport = require("passport-local");
 const review = require("./routes/reviews.js");
 const User = require("./models/user.js");
-const userRoute = require("./routes/users.js")
-mongoose.connect("mongodb://127.0.0.1:27017/yelp-camp");
+const userRoute = require("./routes/users.js");
+
+const MongoStore = require('connect-mongo');
+
+const dbUrl = 'mongodb://127.0.0.1:27017/myapp' || process.env.DB_URL;
+mongoose.connect(dbUrl)
 
 const db = mongoose.connection;
 db.once("open", () => {
@@ -39,13 +40,84 @@ app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+  })
+);
+const scriptSrcUrls = [
+  "https://stackpath.bootstrapcdn.com/",
+  // "https://api.tiles.mapbox.com/",
+  // "https://api.mapbox.com/",
+  "https://kit.fontawesome.com/",
+  "https://cdnjs.cloudflare.com/",
+  "https://cdn.jsdelivr.net",
+  "https://cdn.maptiler.com/", // add this
+];
+const styleSrcUrls = [
+  "https://kit-free.fontawesome.com/",
+  "https://stackpath.bootstrapcdn.com/",
+  // "https://api.mapbox.com/",
+  // "https://api.tiles.mapbox.com/",
+  "https://fonts.googleapis.com/",
+  "https://use.fontawesome.com/",
+  "https://cdn.jsdelivr.net",
+  "https://cdn.maptiler.com/", // add this
+];
+const connectSrcUrls = [
+  // "https://api.mapbox.com/",
+  // "https://a.tiles.mapbox.com/",
+  // "https://b.tiles.mapbox.com/",
+  // "https://events.mapbox.com/",
+  "https://api.maptiler.com/", // add this
+];
+const fontSrcUrls = [];
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: [],
+      connectSrc: ["'self'", ...connectSrcUrls],
+      scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
+      styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
+      workerSrc: ["'self'", "blob:"],
+      objectSrc: [],
+      imgSrc: [
+        "'self'",
+        "blob:",
+        "data:",
+        "https://res.cloudinary.com/dtsmrrabz/", //SHOULD MATCH YOUR CLOUDINARY ACCOUNT!
+        "https://images.unsplash.com/",
+        "https://api.maptiler.com/",
+      ],
+      fontSrc: ["'self'", ...fontSrcUrls],
+    },
+  })
+);
 
+
+const store = MongoStore.create({
+  mongoUrl: dbUrl,
+  touchAfter: 24 * 60 * 60,
+  crypto: {
+      secret: 'yourSecretKey'
+  }
+});
+
+const secret= process.env.SECRET || "yourSecretKey"
+store.on("error", function(e){
+console.log("SESSION STORE ERROR", e)
+})
 app.use(
   session({
-    secret: "yourSecretKey", // Replace with a secure secret
+    store,
+    secret, // Replace with a secure secret
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }, // Set to true if using HTTPS
+    cookie: {
+      httpOnly: true,
+      expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    }, // Set to true if using HTTPS
   })
 );
 
@@ -55,20 +127,23 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 passport.use(new localPassport(User.authenticate()));
-passport.serializeUser(User.serializeUser())
-passport.deserializeUser(User.deserializeUser())
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 app.use((req, res, next) => {
-  console.log(req.session)
-  res.locals.currentUser = req.user
+  console.log(req.query);
+  res.locals.currentUser = req.user;
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   next();
 });
 
-app.use("/", userRoute)
+app.use("/", userRoute);
 app.use("/campgrounds", campgrounds);
 app.use("/campgrounds/:id/reviews", review);
 
+app.get("/", (req, res) => {
+  res.render("landingpage");
+});
 app.all("*", (req, res, next) => {
   next(new ExpressError("Page not FOUND", 404));
 });

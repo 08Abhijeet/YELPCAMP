@@ -14,7 +14,7 @@ const seedDB = async () => {
     try {
         await Campground.deleteMany({});
 
-        for (let i = 0; i < 50; i++) {
+        for (let i = 0; i < 300; i++) {
             const randomCityIndex = Math.floor(Math.random() * cities.length);
             const price = Math.floor(Math.random() * 50) + 10;
             const camp = new Campground({
@@ -25,7 +25,11 @@ const seedDB = async () => {
                 price,
                 geometry:{
                     type:"Point",
-                    coordinates:[-113.1331,47.0202]
+                    coordinates:[
+                        cities[randomCityIndex].longitude,
+                        cities[randomCityIndex].latitude,
+
+                    ]
                 },
                 image: [
                     {
