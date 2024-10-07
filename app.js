@@ -25,8 +25,7 @@ const User = require("./models/user.js");
 const userRoute = require("./routes/users.js");
 
 const MongoStore = require('connect-mongo');
-
-const dbUrl = 'mongodb://127.0.0.1:27017/myapp' || process.env.DB_URL;
+const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/yelp-camp';
 mongoose.connect(dbUrl)
 
 const db = mongoose.connection;
@@ -41,9 +40,7 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(
-  helmet({
-    contentSecurityPolicy: false,
-  })
+  helmet()
 );
 const scriptSrcUrls = [
   "https://stackpath.bootstrapcdn.com/",
@@ -130,7 +127,6 @@ passport.use(new localPassport(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 app.use((req, res, next) => {
-  console.log(req.query);
   res.locals.currentUser = req.user;
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
