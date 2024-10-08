@@ -25,13 +25,8 @@ const User = require("./models/user.js");
 const userRoute = require("./routes/users.js");
 
 const MongoStore = require('connect-mongo');
-const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/yelp-camp';
-mongoose.connect(dbUrl, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).catch(error => {
-  console.error("Error connecting to the database:", error);
-});
+const dbUrl =  process.env.DB_URL || 'mongodb://localhost:27017/yelp-camp';
+mongoose.connect(dbUrl);
 
 
 const db = mongoose.connection;
@@ -155,6 +150,7 @@ app.use((err, req, res, next) => {
   if (!err.message) err.message = "OH NO, Something went WRONG!!";
   res.status(statusCode).render("error", { err });
 });
+const port = process.env.PORT || 4000
 app.listen(4000, () => {
   console.log("Listening to the port 4000");
 });
